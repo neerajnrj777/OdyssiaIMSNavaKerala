@@ -760,6 +760,37 @@ function find_slow_moving_products($start_date, $end_date, $offset = 0, $limit =
 }
 
 /*--------------------------------------------------------------*/
+/* Function for finding products with the lowest outward movement Export
+/*--------------------------------------------------------------*/
+function find_slow_moving_products_export($start_date, $end_date){
+  global $db;
+  $start_date = date("Y-m-d", strtotime($start_date));
+  $end_date   = date("Y-m-d", strtotime($end_date));
+
+  $sql  = "SELECT SQL_CALC_FOUND_ROWS p.ProductId,p.Itemcode,p.ItemName,c.CategoryName,p.ProductValue,";
+  $sql .= "COALESCE(current_stock.CurrentStock,0) AS CurrentStock,";
+  $sql .= "COALESCE(outward_movement.OutwardQty,0) AS OutwardQty,";
+  $sql .= "outward_movement.LastMovement ";
+  $sql .= "FROM productdetails p ";
+  $sql .= "LEFT JOIN categorydetails c ON c.CategoryId = p.CategoryId ";
+  $sql .= "LEFT JOIN (";
+  $sql .= "SELECT ProductId,SUM(BarcodeQuantity) AS CurrentStock FROM (";
+  $sql .= "SELECT s.ProductId,s.Barcode,MAX(b.Quantity) AS BarcodeQuantity ";
+  $sql .= "FROM stockdetails s INNER JOIN barcodedetails b ON b.Barcode = s.Barcode ";
+  $sql .= "WHERE s.StockType = 'IN - First Entry' GROUP BY s.ProductId,s.Barcode";
+  $sql .= ") AS barcode_stock GROUP BY ProductId";
+  $sql .= ") AS current_stock ON current_stock.ProductId = p.ProductId ";
+  $sql .= "LEFT JOIN (";
+  $sql .= "SELECT ProductId,SUM(Quantity) AS OutwardQty,MAX(Created_at) AS LastMovement ";
+  $sql .= "FROM stockdetails WHERE LOWER(StockType) LIKE 'out%' ";
+  $sql .= "AND DATE(Created_at) BETWEEN '{$start_date}' AND '{$end_date}' GROUP BY ProductId";
+  $sql .= ") AS outward_movement ON outward_movement.ProductId = p.ProductId ";
+  $sql .= "WHERE COALESCE(current_stock.CurrentStock,0) > 0 ";
+  $sql .= "ORDER BY COALESCE(outward_movement.OutwardQty,0) ASC,p.ItemName ASC";
+  return $db->query($sql);
+}
+
+/*--------------------------------------------------------------*/
 /* Function for Generate plan wise report by plan or chelan no
 /*--------------------------------------------------------------*/
 function find_stock_by_plan($planno){

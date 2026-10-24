@@ -8,6 +8,21 @@ $end_date = isset($_GET['end-date']) ? date('Y-m-d', strtotime($_GET['end-date']
 $start_date = isset($_GET['start-date']) ? date('Y-m-d', strtotime($_GET['start-date'])) : date('Y-m-d', strtotime('-90 days'));
 $limit = 20;
 $offset = 0;
+
+if(isset($_GET['excel'])) {
+
+        //$tasks = array();
+        $products = find_slow_moving_products_export($start_date, $end_date);
+
+        $filename = "IMS_SlowMovingProductReport_export_".date('Ymd') . ".xls";
+            header("Content-Type: application/vnd.ms-excel");
+        header("Content-Disposition: attachment; filename=\"$filename\"");
+        ExportFile($products);
+        //print_r($tasks);
+        //echo "yes";die();
+
+      }
+
 foreach (array_keys($_GET) as $query_key) {
   if (ctype_digit((string)$query_key)) {
     $offset = max(0, (int)$query_key);
@@ -44,6 +59,12 @@ $pagination = new Pagination(array(
           <span class="glyphicon glyphicon-stats"></span>
           <span>Slow Moving Products</span>
         </strong>
+        <?php if(isset($_GET['start-date']) && isset($_GET['end-date'])) { ?>
+      <div class="pull-right">
+		   <a href="slow_moving_products.php?excel=1&start_date=<?php echo  $start_date; ?>&end_date=<?php echo  $end_date; ?>" class="btn btn-primary">Export</a>
+           <a href="slow_moving_products.php?print=1&start_date=<?php echo  $start_date; ?>&end_date=<?php echo  $end_date; ?>" target="_blank" class="btn btn-primary">Print</a>
+         </div>
+         <?php } ?>
       </div>
       <div class="panel-body">
         <form class="clearfix" method="get" action="slow_moving_products.php">
