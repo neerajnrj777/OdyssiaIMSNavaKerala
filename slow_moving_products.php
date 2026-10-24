@@ -62,7 +62,6 @@ $pagination = new Pagination(array(
         <?php if(isset($_GET['start-date']) && isset($_GET['end-date'])) { ?>
       <div class="pull-right">
 		   <a href="slow_moving_products.php?excel=1&start_date=<?php echo  $start_date; ?>&end_date=<?php echo  $end_date; ?>" class="btn btn-primary">Export</a>
-           <a href="slow_moving_products.php?print=1&start_date=<?php echo  $start_date; ?>&end_date=<?php echo  $end_date; ?>" target="_blank" class="btn btn-primary">Print</a>
          </div>
          <?php } ?>
       </div>
