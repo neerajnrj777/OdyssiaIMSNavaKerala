@@ -1082,7 +1082,7 @@ function   check_barcode_entry($fullbarcode){
    /*--------------------------------------------------------------*/
    function find_locationwise_product($locationname) {
     global $db;
-    $sql  =" SELECT p.ProductId,b.Barcode,p.ItemName,p.Itemcode,b.Fullbarcode,b.Quantity,l.LocationName";
+    $sql  =" SELECT DISTINCT p.ProductId,b.Barcode,p.ItemName,p.Itemcode,b.Fullbarcode,b.Quantity,l.LocationName";
     $sql  .=" FROM barcodedetails as b";
     $sql  .=" Left join stockdetails as s on b.Barcode = s.Barcode";
     $sql  .=" Left join productdetails as p on s.ProductId = p.ProductId";
